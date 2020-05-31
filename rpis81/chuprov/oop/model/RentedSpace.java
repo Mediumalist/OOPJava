@@ -1,48 +1,31 @@
 package rpis81.chuprov.oop.model;
 
-public class RentedSpace implements Space {
-
-    private Vehicle vehicle;
-    private Person person;
-
-    public RentedSpace(Vehicle vehicle, Person person) {
-        this.vehicle = vehicle;
-        this.person = person;
-    }
+public class RentedSpace extends AbstractSpace {
 
     public RentedSpace() {
-        this(new Vehicle(), Person.getUnknownPerson());
+        super();
     }
 
-    @Override
-    public Vehicle getVehicle() {
-        return vehicle;
+    public RentedSpace(Person person) {
+        super(person);
     }
 
-    @Override
-    public void setVehicle(Vehicle vehicle) {
-        this.vehicle = vehicle;
-    }
-
-    @Override
-    public Person getPerson() {
-        return person;
-    }
-
-    @Override
-    public void setPerson(Person person) {
-        this.person = person;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return vehicle == null || vehicle.getRegistrationNumber().isEmpty();
+    public RentedSpace(Vehicle vehicle, Person person) {
+        super(vehicle, person);
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("# Space #\n");
-        builder.append(vehicle.toString()).append(person.toString());
-        return builder.toString();
+        return String.format("Tenant:\n%s", super.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return 53 * super.hashCode();
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

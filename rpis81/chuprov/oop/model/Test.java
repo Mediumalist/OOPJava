@@ -4,7 +4,9 @@ public class Test {
 
     public static void main(String... args) {
         //lab1tests();
-        lab2tests();
+        //lab2tests();
+        lab3tests();
+        lab4tests();
     }
 
     /*
@@ -12,6 +14,8 @@ public class Test {
      */
 
     private static void lab1tests() {
+        printFrame();
+        System.out.println("Лабораторная №1");
         testPersons();
         testVehicles();
         testSpaces();
@@ -19,36 +23,40 @@ public class Test {
     }
 
     private static void testPersons() {
+        printFrame();
         Person firstPerson = new Person("Alex", "Lebowski");
         Person secondPerson = new Person("Keanu", "Reeves");
         Person thirdPerson = new Person("Vasya", "Pupkin");
-        System.out.println("\nВот несколько человек:\n" + firstPerson.toString() + secondPerson.toString() +
+        System.out.println("Вот несколько человек:\n" + firstPerson.toString() + secondPerson.toString() +
                 thirdPerson.toString());
     }
 
     private static void testVehicles() {
-        Vehicle vehicle = new Vehicle("K257TC", "BMW", "X5");
-        Vehicle secondVehicle = new Vehicle();
-        System.out.println("\nВот несколько машин: " + vehicle.toString() + secondVehicle.toString());
+        printFrame();
+        Vehicle vehicle = new Vehicle("K257TC", "BMW", "X5", VehicleTypes.CAR);
+        Vehicle secondVehicle = new Vehicle(VehicleTypes.MOTORBIKE);
+        System.out.println("Вот несколько машин:\n" + vehicle.toString() + "\n" + secondVehicle.toString());
     }
 
     private static void testSpaces() {
+        printFrame();
         RentedSpace firstRentedSpace = new RentedSpace();
-        RentedSpace secondRentedSpace = new RentedSpace(new Vehicle("K257TC", "BMW", "X5"),
+        RentedSpace secondRentedSpace = new RentedSpace(new Vehicle("K257TC", "BMW", "X5", VehicleTypes.CAR),
                 new Person("Keanu", "Reeves"));
-        RentedSpace thirdRentedSpace = new RentedSpace(new Vehicle(), new Person("Vasya", "Pupkin"));
-        System.out.println("\nПервое место пустое? " + firstRentedSpace.isEmpty());
+        RentedSpace thirdRentedSpace = new RentedSpace(new Vehicle(VehicleTypes.TRUCK), new Person("Vasya", "Pupkin"));
+        System.out.println("Первое место пустое? " + firstRentedSpace.isEmpty());
         System.out.println("Второе место пустое? " + secondRentedSpace.isEmpty());
         System.out.println("Третье место пустое? " + thirdRentedSpace.isEmpty());
     }
 
     private static void testOwnersFloor() {
+        printFrame();
         OwnersFloor floor = createOwnersFloor();
-        System.out.println("\nСостояние этажа после распределения мест: " + floor.toString());
+        System.out.println("Состояние этажа после распределения мест: " + floor.toString());
         System.out.println("\nНайдено место по номеру K257TC: " + floor.hasSpace("K257TC") + ", " +
-                floor.getSpace("K257TC").toString());
-        System.out.println("\nНайдено место по индексу 2: " + floor.getSpace(2).toString());
-        floor.replaceWith(1, new RentedSpace(new Vehicle("X225HK", "UAZ", "Patriot"),
+                floor.get("K257TC").toString());
+        System.out.println("\nНайдено место по индексу 2: " + floor.get(2).toString());
+        floor.replaceWith(1, new RentedSpace(new Vehicle("X225HK", "UAZ", "Patriot", VehicleTypes.CAR),
                 new Person("Nursultan", "Uzurbekov")));
         System.out.println("\nСостояние этажа после замены места: " + floor.toString());
         floor.remove("K257TC");
@@ -56,10 +64,11 @@ public class Test {
     }
 
     private static void testParking() {
+        printFrame();
         OwnersFloor floor = createOwnersFloor();
         Parking parking = new Parking(2);
         parking.add(new OwnersFloor());
-        floor.addSpace(new RentedSpace(new Vehicle("P807OC", "Lada", "Vesta"),
+        floor.add(new RentedSpace(new Vehicle("P807OC", "Lada", "Vesta", VehicleTypes.CAR),
                 new Person("Ivan", "Golovin")));
         parking.add(0, floor);
         System.out.print(parking.toString());
@@ -79,10 +88,9 @@ public class Test {
      */
 
     private static void lab2tests() {
-        testFloorInSecondParking();
-    }
-
-    private static void testFloorInSecondParking() {
+        printFrame();
+        System.out.println("Лабораторная №2");
+        printFrame();
         Parking parking = new Parking(createOwnersFloor(), createRentedSpacesFloor());
         RentedSpacesFloor floor = (RentedSpacesFloor) parking.getFloor(1);
         printFrame();
@@ -98,19 +106,19 @@ public class Test {
         printFrame();
         System.out.println("Добавление парковочного места по индексу 1");
         printFrame();
-        floor.addSpace(1, new RentedSpace(new Vehicle("E005PP", "Geely", "NX"),
+        floor.add(1, new RentedSpace(new Vehicle("E005PP", "Geely", "NX", VehicleTypes.CAR),
                 new Person("Paolo", "Manchini")));
         floor.printSpaces();
         printFrame();
         System.out.println("Замена парковочного места с индексом 2 ");
         printFrame();
-        floor.replaceWith(2, new RentedSpace(new Vehicle("A897AO", "Volkswagen", "Polo"),
+        floor.replaceWith(2, new RentedSpace(new Vehicle("A897AO", "Volkswagen", "Polo", VehicleTypes.CAR),
                 new Person("Gregor", "McYorn")));
         floor.printSpaces();
         printFrame();
         System.out.println("Добавление еще одного места в коне списка");
         printFrame();
-        floor.addSpace(new RentedSpace(new Vehicle("K649TA", "Opel", "Astra"),
+        floor.add(new RentedSpace(new Vehicle("K649TA", "Opel", "Astra", VehicleTypes.CAR),
                 new Person("Vasya", "Pupkin")));
         floor.printSpaces();
         printFrame();
@@ -122,18 +130,17 @@ public class Test {
         System.out.println("Список всех машин на этаже");
         printFrame();
         floor.printVehicles();
-        printFrame();
     }
 
     private static RentedSpacesFloor createRentedSpacesFloor() {
         return new RentedSpacesFloor(new Space[] {
-                new RentedSpace(new Vehicle("K257TC", "BMW", "X5"),
+                new RentedSpace(new Vehicle("K257TC", "BMW", "X5", VehicleTypes.CAR),
                         new Person("Keanu", "Reeves")),
-                new RentedSpace(new Vehicle("T441AX", "Toyota", "RAV4"),
+                new RentedSpace(new Vehicle("T441AX", "Toyota", "RAV4", VehicleTypes.CAR),
                         new Person("Lee", "Kong")),
-                new RentedSpace(new Vehicle("A897AO", "Volkswagen", "Polo"),
+                new RentedSpace(new Vehicle("A897AO", "Volkswagen", "Polo", VehicleTypes.CAR),
                         new Person("Gregor", "McYorn")),
-                new RentedSpace(new Vehicle("X225HK", "UAZ", "Patriot"),
+                new RentedSpace(new Vehicle("X225HK", "UAZ", "Patriot", VehicleTypes.CROSSOVER),
                         new Person("Nursultan", "Uzurbekov"))
         });
     }
@@ -141,7 +148,7 @@ public class Test {
     private static OwnersFloor createOwnersFloor() {
         OwnersFloor floor = new OwnersFloor();
         for (Space space : createRentedSpacesFloor().getSpaces()) {
-            floor.addSpace(new OwnedSpace(space.getVehicle(), space.getPerson()));
+            floor.add(new OwnedSpace(space.getVehicle(), space.getPerson()));
         }
         return floor;
     }
@@ -150,4 +157,99 @@ public class Test {
         System.out.println("============================================" +
                 "============================================");
     }
+
+    /*
+     *  Лабораторная №3
+     */
+
+    private static void lab3tests() {
+        printFrame();
+        System.out.println("Лабораторная №3");
+        printFrame();
+        System.out.println("Тестирование изменений в классе Vehicle");
+        printFrame();
+        Vehicle truck = new Vehicle("H7716OM", "Scania", "SL50", VehicleTypes.TRUCK);
+        Vehicle bikeWithoutNumbers = new Vehicle(VehicleTypes.MOTORBIKE);
+        Vehicle voidVehicle = new Vehicle();
+        System.out.println("Типы созданных машин: " + truck.getType().getValue() + ", " +
+                bikeWithoutNumbers.getType().getValue() + ", " + voidVehicle.getType().getValue());
+        printFrame();
+        System.out.println("Тестирование изменений в классах, реализующих интерфейс Space");
+        printFrame();
+        RentedSpace rentedSpace = new RentedSpace(new Person("Alexey", "Smolnikov"));
+        OwnedSpace ownedSpace = new OwnedSpace(truck, new Person("Max", "Ludendorf"));
+        System.out.println("Является ли rentedSpace пустым? " + rentedSpace.isEmpty());
+        System.out.println("Является ли ownedSpace пустым? " + ownedSpace.isEmpty());
+        System.out.println("Вызов метода setVehicle()...");
+        rentedSpace.setVehicle(bikeWithoutNumbers);
+        System.out.println("Является ли rentedSpace пустым? " + rentedSpace.isEmpty() + "\n");
+        printFrame();
+        System.out.println("Тестирование новых методов интерфейса Floor и класса Parking");
+        printFrame();
+        OwnersFloor firstFloor = createOwnersFloor();
+        RentedSpacesFloor secondFloor = createRentedSpacesFloor();
+        Parking parking = new Parking(firstFloor, secondFloor);
+        System.out.println("Cписок кроссоверов на первом этаже");
+        printFrame();
+        firstFloor.printSpacesByVehiclesType(VehicleTypes.CROSSOVER);
+        printFrame();
+        System.out.println("Cписок автомобилей на втором этаже");
+        printFrame();
+        secondFloor.printSpacesByVehiclesType(VehicleTypes.CAR);
+        printFrame();
+        firstFloor.add(new RentedSpace());
+        firstFloor.add(new RentedSpace());
+        System.out.println("Кол-во пустых мест на первом этаже: " + firstFloor.getFreeSpaces().length);
+        printFrame();
+        secondFloor.add(new RentedSpace());
+        System.out.println("Oбщее число незанятых парковочных мест: " + parking.getFreeSpacesCount());
+        printFrame();
+        System.out.println("Общее число автомобилей: " + parking.getSpacesCountByVehiclesType(VehicleTypes.CAR));
+        printFrame();
+    }
+
+    /*
+     *  Лабораторная №4
+     */
+
+    private static void lab4tests() {
+        printFrame();
+        System.out.println("Лабораторная №4");
+        printFrame();
+        System.out.println("Тестирование методов toString(), equals() и hascode()");
+        printFrame();
+        OwnersFloor firstFloor = createOwnersFloor();
+        RentedSpacesFloor secondFloor = createRentedSpacesFloor();
+        Parking parking = new Parking(firstFloor, secondFloor);
+        Space space = firstFloor.get(2);
+        Space otherSpace = secondFloor.get(1);
+        System.out.println(space.toString() + "\n" + otherSpace.toString());
+        System.out.println("space hashcode: " + space.hashCode());
+        System.out.println("otherSpace hashcode: " + otherSpace.hashCode());
+        System.out.println("space.equals(otherSpace)? " + space.equals(otherSpace));
+        System.out.println("space.equals(space)? " + space.equals(space));
+        printFrame();
+        System.out.println("Тестирование новых методов интерфейса Floor и класса Parking");
+        printFrame();
+        System.out.println("Удаление парковочного места по ссылке");
+        printFrame();
+        System.out.println("Состояние этажа до удаления места: ");
+        firstFloor.printSpaces();
+        System.out.println("Удаление прошло успешно? " + firstFloor.remove(space));
+        System.out.println("Состояние этажа после удаления места: ");
+        firstFloor.printSpaces();
+        printFrame();
+        space = firstFloor.get(1);
+        System.out.println("Индекс вхождения объекта Space: " + firstFloor.indexOf(space));
+        printFrame();
+        Person person = space.getPerson();
+        System.out.println("Число парковочных мест, связанных c " + person.toString() + ": " +
+                firstFloor.getSpacesCountWithPerson(person));
+        printFrame();
+        System.out.println("Массив этажей, на которых есть парковочные места, принадлежащие " + person.toString());
+        printFrame();
+        parking.printFloorsWithPerson(person);
+        printFrame();
+    }
 }
+

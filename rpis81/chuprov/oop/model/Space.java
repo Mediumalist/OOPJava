@@ -7,4 +7,8 @@ public interface Space {
     Person getPerson();
     void setPerson(Person person);
     boolean isEmpty();
+    String toString();
+    int hashCode();
+    boolean equals(Object obj);
+    public Object clone() throws CloneNotSupportedException;
 }

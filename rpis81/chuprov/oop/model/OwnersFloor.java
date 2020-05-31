@@ -1,11 +1,15 @@
 package rpis81.chuprov.oop.model;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class OwnersFloor implements Floor, InstanceHandler {
 
     private Space[] spaces;
     private int size;
     private final static int DEFAULT_SIZE = 16;
     private final static int INITIAL_SIZE = 0;
+    private final static Space DEFAULT_SPACE = new RentedSpace();
 
     public OwnersFloor(Space[] spaces) {
         this.spaces = spaces;
@@ -22,9 +26,8 @@ public class OwnersFloor implements Floor, InstanceHandler {
         this.size = INITIAL_SIZE;
     }
 
-
     @Override
-    public boolean addSpace(Space space) {
+    public boolean add(Space space) {
         expand();
         for(int i = 0; i < spaces.length; i++) {
             if(spaces[i] == null) {
@@ -37,54 +40,60 @@ public class OwnersFloor implements Floor, InstanceHandler {
     }
 
     @Override
-    public boolean addSpace(int index, Space space) {
+    public boolean add(int index, Space space) {
         shift(index, false);
-        return addSpace(space);
+        return add(space);
     }
 
     @Override
-    public Space getSpace(int index) {
+    public Space get(int index) {
         return spaces[index];
     }
 
     @Override
-    public Space getSpace(String registrationNumber) {
-        for(Space rentedSpace : spaces) {
-            if(checkRegistrationNumber(rentedSpace, registrationNumber)) {
-                return rentedSpace;
+    public Space get(String registrationNumber) {
+        for(Space space : spaces) {
+            if(checkRegistrationNumber(space, registrationNumber)) {
+                return space;
             }
         }
-        return new RentedSpace();
+        return DEFAULT_SPACE;
     }
 
     @Override
     public boolean hasSpace(String registrationNumber) {
-        for(Space rentedSpace : spaces) {
-            if(checkRegistrationNumber(rentedSpace, registrationNumber)) {
-                return true;
-            }
-        }
-        return false;
+        return Arrays.stream(spaces)
+                .anyMatch(space -> checkRegistrationNumber(space, registrationNumber));
     }
 
     @Override
-    public boolean checkRegistrationNumber(Space rentedSpace, String registrationNumber) {
-        return rentedSpace.getVehicle().getRegistrationNumber().equals(registrationNumber);
+    public boolean hasSpace(Person person) {
+        return Arrays.stream(spaces).anyMatch(space -> space.getPerson().equals(person));
+    }
+
+    @Override
+    public boolean checkRegistrationNumber(Space space, String registrationNumber) {
+        return space.getVehicle().getRegistrationNumber().equals(registrationNumber);
+    }
+
+    @Override
+    public boolean checkVehiclesType(Space space, VehicleTypes type) {
+        return space.getVehicle().getType().equals(type);
     }
 
     @Override
     public Space replaceWith(int index, Space space) {
-        Space replacedRentedSpace = spaces[index];
+        Space replacedSpace = spaces[index];
         spaces[index] = space;
-        return replacedRentedSpace;
+        return replacedSpace;
     }
 
     @Override
     public Space remove(int index) {
-        Space removedRentedSpace = spaces[index];
+        Space removedSpace = spaces[index];
         shift(index, true);
         size--;
-        return removedRentedSpace;
+        return removedSpace;
     }
 
     @Override
@@ -94,9 +103,31 @@ public class OwnersFloor implements Floor, InstanceHandler {
                 return remove(i);
             }
         }
-        return new RentedSpace();
+        return DEFAULT_SPACE;
     }
 
+    @Override
+    public boolean remove(Space space) {
+        remove(indexOf(space));
+        return true;
+    }
+
+    @Override
+    public int indexOf(Space space) {
+        for(int i = 0; i < size; i++) {
+            if(get(i).equals(space)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public int getSpacesCountWithPerson(Person person) {
+        return (int) Arrays.stream(getSpaces())
+                .filter(space -> space.getPerson().equals(person))
+                .count();
+    }
 
     @Override
     public int size() {
@@ -112,11 +143,31 @@ public class OwnersFloor implements Floor, InstanceHandler {
 
     @Override
     public Vehicle[] getVehicles() {
-        Vehicle[] notNullVechicles = new Vehicle[size];
-        for(int i = 0; i < size; i++) {
-            notNullVechicles[i] = spaces[i].getVehicle();
-        }
-        return notNullVechicles;
+        return Arrays.stream(getSpaces())
+                .map(Space::getVehicle)
+                .filter(Objects::nonNull)
+                .toArray(Vehicle[]::new);
+    }
+
+    @Override
+    public int getVehiclesCount() {
+        return getVehicles().length;
+    }
+
+    @Override
+    public Space[] getSpacesByVehiclesType(VehicleTypes type) {
+        return Arrays.stream(getSpaces())
+                .filter(space -> checkVehiclesType(space, type))
+                .toArray(Space[]::new);
+    }
+
+    @Override
+    public Space[] getFreeSpaces() {
+        return getSpacesByVehiclesType(VehicleTypes.NONE);
+    }
+
+    public int getSpacesCountByVehiclesType(VehicleTypes type) {
+        return getSpacesByVehiclesType(type).length;
     }
 
     @Override
@@ -143,13 +194,54 @@ public class OwnersFloor implements Floor, InstanceHandler {
         }
     }
 
+    public void printSpaces() {
+        System.out.println(toString());
+    }
+
+    public void printVehicles() {
+        for(Vehicle vehicle : getVehicles()) {
+            System.out.println(vehicle.toString());
+        }
+    }
+
+    public void printSpacesByVehiclesType(VehicleTypes type) {
+        for(Space space : getSpacesByVehiclesType(type)) {
+            System.out.println(space.toString());
+        }
+    }
+
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("\n\nFloor with size ");
-        builder.append(size);
-        for (Space space : getSpaces()) {
-            builder.append(space.toString());
+        StringBuilder builder = new StringBuilder("Spaces:\n");
+        for(Space space : getSpaces()) {
+            builder.append(space.toString()).append("\n");
         }
         return builder.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        int code = 71 * size;
+        for (Space space : getSpaces()) {
+            code ^= space.hashCode();
+        }
+        return code;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj) {
+            return true;
+        }
+        if(!(obj instanceof OwnersFloor)) {
+            return false;
+        }
+        OwnersFloor other = (OwnersFloor) obj;
+        return size == other.size && Objects.deepEquals(spaces, other.spaces);
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }
