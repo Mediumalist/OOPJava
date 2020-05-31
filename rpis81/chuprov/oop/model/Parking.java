@@ -1,5 +1,7 @@
 package rpis81.chuprov.oop.model;
 
+import java.util.Arrays;
+
 public class Parking implements InstanceHandler {
 
     private Floor[] floors;
@@ -28,10 +30,10 @@ public class Parking implements InstanceHandler {
 
     public Floor[] getSortedFloors() {
         Floor floor;
-        Floor[] sortedFloors = floors.clone();
+        Floor[] sortedFloors = getFloors();
         for(int i = 0; i < sortedFloors.length; i++) {
             for(int j = i + 1; j < i; j++) {
-                if(sortedFloors[i].size() > sortedFloors[j].size()) {
+                if(sortedFloors[i].size() < sortedFloors[j].size()) {
                     floor = sortedFloors[i];
                     sortedFloors[i] = sortedFloors[j];
                     sortedFloors[j] = floor;
@@ -45,10 +47,8 @@ public class Parking implements InstanceHandler {
         Vehicle[] vehicles = new Vehicle[getSpacesCount()];
         int counter = 0;
         for(Floor floor : floors) {
-            for(Space space : floor.getSpaces()) {
-                vehicles[counter] = space.getVehicle();
-                counter++;
-            }
+            System.arraycopy(floor.getVehicles(), 0, vehicles, counter, floor.getVehiclesCount());
+            counter += floor.getVehiclesCount();
         }
         return vehicles;
     }
@@ -98,7 +98,7 @@ public class Parking implements InstanceHandler {
     public Space removeSpace(String registrationNumber) {
         for(int i = 0; i < getFloors().length; i++) {
             for(int j = 0; j < getFloors()[i].getSpaces().length; j++) {
-                if(floors[i].checkRegistrationNumber(floors[i].getSpace(j), registrationNumber)) {
+                if(floors[i].checkRegistrationNumber(floors[i].get(j), registrationNumber)) {
                     return floors[i].remove(j);
                 }
             }
@@ -121,8 +121,8 @@ public class Parking implements InstanceHandler {
         Space replacedSpace = new RentedSpace();
         for(int i = 0; i < getFloors().length; i++) {
             for(int j = 0; j < getFloors()[i].getSpaces().length; j++) {
-                if(floors[i].checkRegistrationNumber(floors[i].getSpace(j), registrationNumber)) {
-                    replacedSpace = floors[i].getSpace(j);
+                if(floors[i].checkRegistrationNumber(floors[i].get(j), registrationNumber)) {
+                    replacedSpace = floors[i].get(j);
                     floors[i].getSpaces()[j] = space;
                 }
             }
@@ -140,6 +140,12 @@ public class Parking implements InstanceHandler {
             count += floor.getSpacesCountByVehiclesType(type);
         }
         return count;
+    }
+
+    public Floor[] getFloorsWithPerson(Person person) {
+        return Arrays.stream(floors)
+                .filter(floor -> floor.hasSpace(person))
+                .toArray(Floor[]::new);
     }
 
     @Override
@@ -166,9 +172,16 @@ public class Parking implements InstanceHandler {
         }
     }
 
+    public void printFloorsWithPerson(Person person) {
+        for(Floor floor : getFloorsWithPerson(person)) {
+            System.out.println(floor.toString());
+        }
+    }
+
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("\n= Parking =");
+        StringBuilder builder = new StringBuilder("\nFloors (");
+        builder.append(size).append(" total):\n");
         for(Floor floor : getFloors()) {
             builder.append(floor.toString());
         }

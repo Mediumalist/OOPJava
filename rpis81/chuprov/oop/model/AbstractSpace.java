@@ -1,6 +1,8 @@
 package rpis81.chuprov.oop.model;
 
-public abstract class AbstractSpace implements Space {
+import java.util.Objects;
+
+public abstract class AbstractSpace implements Space, Cloneable {
 
     private Vehicle vehicle;
     private Person person;
@@ -45,8 +47,28 @@ public abstract class AbstractSpace implements Space {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("# Space #\n");
-        builder.append(vehicle.toString()).append(person.toString());
-        return builder.toString();
+        return String.format("[Person] %s\n[Vehicle] %s\n", person.toString(), vehicle.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(person, vehicle);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj) {
+            return true;
+        }
+        if(!(obj instanceof AbstractSpace)) {
+            return false;
+        }
+        AbstractSpace other = (AbstractSpace) obj;
+        return Objects.equals(person, other.person) && Objects.equals(vehicle, other.vehicle);
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }
