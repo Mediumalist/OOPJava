@@ -13,6 +13,7 @@ public class Test {
         lab3tests();
         lab4tests();
         lab5tests();
+        lab6tests();
     }
 
     /*
@@ -32,9 +33,7 @@ public class Test {
         printFrame();
         Person firstPerson = new Person("Alex", "Lebowski");
         Person secondPerson = new Person("Keanu", "Reeves");
-        Person thirdPerson = new Person("Vasya", "Pupkin");
-        System.out.println("Вот несколько человек:\n" + firstPerson.toString() + "\n" + secondPerson.toString() +
-                "\n" + thirdPerson.toString());
+        System.out.println("Вот несколько человек:\n" + firstPerson.toString() + "\n" + secondPerson.toString());
     }
 
     private static void testVehicles() {
@@ -76,17 +75,23 @@ public class Test {
     private static void testParking() {
         printFrame();
         OwnersFloor floor = createOwnersFloor();
+        floor.iterator().forEachRemaining(System.out::println);
         Parking parking = new Parking(2);
         parking.add(new OwnersFloor());
         floor.add(new RentedSpace(new Vehicle("P807OC32", "Lada", "Vesta", VehicleTypes.CAR),
                 new Person("Ivan", "Golovin")));
         parking.add(0, floor);
         System.out.print(parking.toString());
+        System.out.println(parking.getSpacesCount());
         System.out.print("\nРазмеры отсортированных этажей: " + parking.getSortedFloors()[0].size() + ", " +
                 parking.getSortedFloors()[1].size());
         System.out.print("\nОбщее кол-во машин: " + parking.getVechicles().length);
         parking.replaceFloor(0, floor);
-        parking.replaceSpace(new RentedSpace(), "B257TC63");
+        try {
+            parking.replaceSpace(new RentedSpace(), "T441AX56");
+        } catch (NoRentedSpaceException e) {
+            e.printStackTrace();
+        }
         parking.removeSpace("A897AO63");
         parking.removeFloor(1);
         System.out.println("\nКонечное состояние парковки");
@@ -106,30 +111,30 @@ public class Test {
         System.out.println("Тестирование нового добавленного класса - RentedSpaceFloor\n" +
                 "Начальное состояние этажа");
         printFrame();
-        floor.printSpaces();
+        System.out.println(floor.toString());
         printFrame();
         System.out.println("Удаление парковочного места с индексом 2");
         printFrame();
         floor.remove(2);
-        floor.printSpaces();
+        System.out.println(floor.toString());
         printFrame();
         System.out.println("Добавление парковочного места по индексу 1");
         printFrame();
         floor.add(1, new RentedSpace(new Vehicle("E005PP97", "Geely", "NX", VehicleTypes.CAR),
                 new Person("Paolo", "Manchini")));
-        floor.printSpaces();
+        System.out.println(floor.toString());
         printFrame();
         System.out.println("Замена парковочного места с индексом 2 ");
         printFrame();
         floor.replaceWith(2, new RentedSpace(new Vehicle("A897AO63", "Volkswagen", "Polo", VehicleTypes.CAR),
                 new Person("Gregor", "McYorn")));
-        floor.printSpaces();
+        System.out.println(floor.toString());
         printFrame();
         System.out.println("Добавление еще одного места в конец списка");
         printFrame();
         floor.add(new RentedSpace(new Vehicle("K914TY56", "Opel", "Astra", VehicleTypes.CAR),
                 new Person("Vasya", "Pupkin")));
-        floor.printSpaces();
+        System.out.println(floor.toString());
         printFrame();
         System.out.println("Проверка наличия парковочных мест по заданному номеру");
         printFrame();
@@ -138,7 +143,7 @@ public class Test {
         printFrame();
         System.out.println("Список всех машин на этаже");
         printFrame();
-        floor.printVehicles();
+        floor.iterator().forEachRemaining(space -> System.out.println(space.getVehicle().toString()));
     }
 
     private static RentedSpacesFloor createRentedSpacesFloor() {
@@ -255,10 +260,10 @@ public class Test {
         System.out.println("Удаление парковочного места по ссылке");
         printFrame();
         System.out.println("Состояние этажа до удаления места: ");
-        firstFloor.printSpaces();
+        System.out.println(firstFloor.toString());
         System.out.println("Удаление прошло успешно? " + firstFloor.remove(space));
         System.out.println("Состояние этажа после удаления места: ");
-        firstFloor.printSpaces();
+        System.out.println(firstFloor.toString());
         printFrame();
         space = firstFloor.get(1);
         System.out.println("Индекс вхождения объекта Space: " + firstFloor.indexOf(space));
@@ -270,7 +275,6 @@ public class Test {
         System.out.println("Массив этажей, на которых есть парковочные места, принадлежащие " + person.toString());
         printFrame();
         parking.printFloorsWithPerson(person);
-        printFrame();
     }
 
     /*
@@ -287,10 +291,10 @@ public class Test {
         System.out.println("Тестирование исключений");
         printFrame();
         try {
-            Person guessWho = new Person(null, "Detrov");
-            Vehicle vehicleWithIncorrectNumber = new Vehicle("rniebo", "Suzuki", "MAV5", VehicleTypes.MOTORBIKE);
-            firstFloor.getSpacesByVehiclesType(null);
-            firstFloor.get(23);
+            //Person guessWho = new Person(null, "Detrov");
+            //Vehicle vehicleWithIncorrectNumber = new Vehicle("rniebo", "Suzuki", "MAV5", VehicleTypes.MOTORBIKE);
+            //firstFloor.getSpacesByVehiclesType(null);
+            //firstFloor.get(23);
             System.out.println("Тестирование новых методов, работающих с LocalDate");
             printFrame();
             RentedSpace rentedSpace = (RentedSpace) secondFloor.get(1);
@@ -301,7 +305,7 @@ public class Test {
                     secondFloor.getSpaceWithNearestEndsDate().toString());
             printFrame();
             System.out.println("Список всех мест на этаже:\n");
-            secondFloor.printSpaces();
+            System.out.println(secondFloor.toString());
         }
         catch (NullPointerException | RegistrationNumberFormatException | IndexOutOfBoundsException |
                 NoSuchElementException | NoRentedSpaceException e) {
@@ -311,5 +315,29 @@ public class Test {
 
     private static String getPeriodValue(Period period) {
         return String.format("%d years %d months %d days", period.getYears(), period.getMonths(), period.getDays());
+    }
+
+    /*
+     *  Лабораторная №6
+     */
+
+    private static void lab6tests() {
+        printFrame();
+        System.out.println("Лабораторная №6");
+        printFrame();
+        System.out.println("Тестирование компаратора");
+        printFrame();
+        OwnersFloor firstFloor = createOwnersFloor();
+        RentedSpacesFloor secondFloor = createRentedSpacesFloor();
+        secondFloor.add(new RentedSpace());
+        OwnersFloor voidFloor = new OwnersFloor();
+        Parking parking = new Parking(firstFloor, secondFloor, voidFloor);
+        System.out.print("Размеры этажей, отсортированных по возрастанию: ");
+        for(Floor floor : parking.getSortedFloors()) {
+            System.out.print(floor.size() + " ");
+        }
+        System.out.println();
+        printFrame();
+        System.out.println("[!] Итератор используется в методах, которые уже протестированы в других лабораторных [!]");
     }
 }

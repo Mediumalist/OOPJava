@@ -1,10 +1,12 @@
 package rpis81.chuprov.oop.model;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class Parking implements InstanceHandler {
+public class Parking implements InstanceHandler, Iterable<Floor> {
 
     private final static int INITIAL_SIZE = 0;
 
@@ -22,34 +24,21 @@ public class Parking implements InstanceHandler {
     }
 
     public int size() {
-        return size;
+        return getFloors().length;
     }
 
     public Floor[] getFloors() {
-        Floor[] notNullFloors = new Floor[size];
-        System.arraycopy(floors, 0, notNullFloors, 0, size);
-        return notNullFloors;
+        return Arrays.stream(floors).filter(Objects::nonNull).toArray(Floor[]::new);
     }
 
     public Floor[] getSortedFloors() {
-        Floor floor;
-        Floor[] sortedFloors = getFloors();
-        for(int i = 0; i < sortedFloors.length; i++) {
-            for(int j = i + 1; j < i; j++) {
-                if(sortedFloors[i].size() < sortedFloors[j].size()) {
-                    floor = sortedFloors[i];
-                    sortedFloors[i] = sortedFloors[j];
-                    sortedFloors[j] = floor;
-                }
-            }
-        }
-        return sortedFloors;
+        return Arrays.stream(getFloors()).sorted(Floor::compareTo).toArray(Floor[]::new);
     }
 
     public Vehicle[] getVechicles() {
         Vehicle[] vehicles = new Vehicle[getSpacesCount()];
         int counter = 0;
-        for(Floor floor : floors) {
+        for(Floor floor : getFloors()) {
             System.arraycopy(floor.getVehicles(), 0, vehicles, counter, floor.getVehiclesCount());
             counter += floor.getVehiclesCount();
         }
@@ -57,11 +46,9 @@ public class Parking implements InstanceHandler {
     }
 
     public int getSpacesCount() {
-        int totalCount = 0;
-        for(Floor floor : floors) {
-            totalCount += floor.size();
-        }
-        return totalCount;
+        AtomicInteger count = new AtomicInteger(0);
+        iterator().forEachRemaining(floor -> count.addAndGet(floor.size()));
+        return count.get();
     }
 
     public boolean add(Floor floor) {
@@ -88,7 +75,7 @@ public class Parking implements InstanceHandler {
         if(index < 0 || index >= size) {
             throw new IndexOutOfBoundsException();
         }
-        return floors[index];
+        return Objects.requireNonNull(floors[index]);
     }
 
     public Floor replaceFloor(int index, Floor floor) {
@@ -106,22 +93,19 @@ public class Parking implements InstanceHandler {
         }
         Floor removedFloor = floors[index];
         shift(index, true);
-        size--;
         return removedFloor;
     }
 
     public Space removeSpace(String registrationNumber) {
-        for(int i = 0; i < getFloors().length; i++) {
-            for(int j = 0; j < getFloors()[i].getSpaces().length; j++) {
-                if(floors[i].isRegistrationNumberEqual(floors[i].get(j), Vehicle.checkNumber(registrationNumber))) {
-                    return floors[i].remove(j);
-                }
+        for(Floor floor : getFloors()) {
+            if(floor.hasSpace(registrationNumber)) {
+                return floor.remove(registrationNumber);
             }
         }
         throw new NoSuchElementException();
     }
 
-    public Space getSpace(String registrationNumber) {
+    public Space getSpace(String registrationNumber) throws NoRentedSpaceException {
         for(Floor floor : floors) {
             for(Space space : floor.getSpaces()) {
                 if(floor.isRegistrationNumberEqual(space, Vehicle.checkNumber(registrationNumber))) {
@@ -129,21 +113,16 @@ public class Parking implements InstanceHandler {
                 }
             }
         }
-        return new RentedSpace();
+        throw new NoRentedSpaceException();
     }
 
-    public Space replaceSpace(Space space, String registrationNumber) {
-        Space replacedSpace = new RentedSpace();
-        for(int i = 0; i < getFloors().length; i++) {
-            for(int j = 0; j < getFloors()[i].getSpaces().length; j++) {
-                if(floors[i].isRegistrationNumberEqual(floors[i].get(j), Vehicle.checkNumber(registrationNumber))) {
-                    replacedSpace = floors[i].get(j);
-                    floors[i].getSpaces()[j] = Objects.requireNonNull(space,
-                            "Параметр space не должен быть null");
-                }
+    public Space replaceSpace(Space space, String registrationNumber) throws NoRentedSpaceException {
+        for(Floor floor : getFloors()) {
+            if(floor.hasSpace(registrationNumber)) {
+                return floor.replaceWith(floor.indexOf(floor.get(registrationNumber)), space);
             }
         }
-        return replacedSpace;
+        throw new NoRentedSpaceException();
     }
 
     public int getFreeSpacesCount() {
@@ -151,12 +130,10 @@ public class Parking implements InstanceHandler {
     }
 
     public int getSpacesCountByVehiclesType(VehicleTypes type) {
-        int count = 0;
-        for(Floor floor : getFloors()) {
-            count += floor.getSpacesCountByVehiclesType(Objects.requireNonNull(type,
-                    "Параметр type не должен быть null"));
-        }
-        return count;
+        Objects.requireNonNull(type, "Параметр type не должен быть null");
+        AtomicInteger count = new AtomicInteger(0);
+        iterator().forEachRemaining(floor -> count.addAndGet(floor.getSpacesCountByVehiclesType(type)));
+        return count.get();
     }
 
     public Floor[] getFloorsWithPerson(Person person) {
@@ -164,6 +141,13 @@ public class Parking implements InstanceHandler {
         return Arrays.stream(floors)
                 .filter(floor -> floor.hasSpace(person))
                 .toArray(Floor[]::new);
+    }
+
+    public void printFloorsWithPerson(Person person) {
+        Objects.requireNonNull(person, "Параметр person не должен быть null");
+        for(Floor floor : getFloorsWithPerson(person)) {
+            System.out.println(floor.toString());
+        }
     }
 
     @Override
@@ -178,6 +162,7 @@ public class Parking implements InstanceHandler {
                 System.arraycopy(floors, index, floors, index + 1, floors.length - index - 1);
                 floors[index] = null;
             }
+            size = size();
         }
     }
 
@@ -190,20 +175,16 @@ public class Parking implements InstanceHandler {
         }
     }
 
-    public void printFloorsWithPerson(Person person) {
-        Objects.requireNonNull(person, "Параметр person не должен быть null");
-        for(Floor floor : getFloorsWithPerson(person)) {
-            System.out.println(floor.toString());
-        }
-    }
-
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("\nFloors (");
         builder.append(size).append(" total):\n");
-        for(Floor floor : getFloors()) {
-            builder.append(floor.toString());
-        }
+        iterator().forEachRemaining(floor -> builder.append(floor.toString()));
         return builder.toString();
+    }
+
+    @Override
+    public Iterator<Floor> iterator() {
+        return new FloorIterator(getFloors());
     }
 }
