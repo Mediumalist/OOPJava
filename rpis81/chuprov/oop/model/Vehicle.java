@@ -43,10 +43,10 @@ public class Vehicle {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("\nVehicle info: ");
+        StringBuilder builder = new StringBuilder("Vehicle info: ");
         builder.append("registration number - ").append(registrationNumber)
                 .append(", manufacturer - ").append(manufacturer)
-                .append(", model - ").append(model);
+                .append(", model - ").append(model).append("\n");
         return builder.toString();
     }
 }

@@ -19,14 +19,14 @@ public class Person {
         return secondName;
     }
 
-public static Person getUnknownPerson() {
+    public static Person getUnknownPerson() {
         return UNKNOWN_PERSON;
-        }
+    }
 
-@Override
-public String toString() {
-        StringBuilder builder = new StringBuilder("\nPerson info: ");
-        builder.append("first name - ").append(firstName).append(", second name - ").append(secondName);
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("Person info: ");
+        builder.append("first name - ").append(firstName).append(", second name - ").append(secondName).append("\n");
         return builder.toString();
-        }
+    }
 }

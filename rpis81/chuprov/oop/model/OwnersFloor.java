@@ -1,6 +1,6 @@
 package rpis81.chuprov.oop.model;
 
-public class OwnersFloor {
+public class OwnersFloor implements Floor, InstanceHandler {
 
     private Space[] spaces;
     private int size;
@@ -22,30 +22,9 @@ public class OwnersFloor {
         this.size = INITIAL_SIZE;
     }
 
-    public int size() {
-        return size;
-    }
 
-    public Space[] getSpaces() {
-        /*
-         *  Благодаря конструкторам, а также методам add() и remove() поле size
-         *  всегда имеет актуальное значение, поэтому при выполнении операций
-         *  с кол-вом элементов = size проверку на null выполнять необязательно
-         */
-        Space[] notNullSpaces = new Space[size];
-        System.arraycopy(spaces, 0, notNullSpaces, 0, size);
-        return notNullSpaces;
-    }
-
-    public Vehicle[] getVehicles() {
-        Vehicle[] notNullVechicles = new Vehicle[size];
-        for(int i = 0; i < size; i++) {
-            notNullVechicles[i] = spaces[i].getVehicle();
-        }
-        return notNullVechicles;
-    }
-
-    public boolean add(Space space) {
+    @Override
+    public boolean addSpace(Space space) {
         expand();
         for(int i = 0; i < spaces.length; i++) {
             if(spaces[i] == null) {
@@ -57,59 +36,90 @@ public class OwnersFloor {
         return false;
     }
 
-    public boolean add(int index, Space space) {
+    @Override
+    public boolean addSpace(int index, Space space) {
         shift(index, false);
-        return add(space);
+        return addSpace(space);
     }
 
+    @Override
     public Space getSpace(int index) {
         return spaces[index];
     }
 
+    @Override
     public Space getSpace(String registrationNumber) {
-        for(Space space : spaces) {
-            if(checkRegistrationNumber(space, registrationNumber)) {
-                return space;
+        for(Space rentedSpace : spaces) {
+            if(checkRegistrationNumber(rentedSpace, registrationNumber)) {
+                return rentedSpace;
             }
         }
-        return new Space();
+        return new RentedSpace();
     }
 
+    @Override
     public boolean hasSpace(String registrationNumber) {
-        for(Space space : spaces) {
-            if(checkRegistrationNumber(space, registrationNumber)) {
+        for(Space rentedSpace : spaces) {
+            if(checkRegistrationNumber(rentedSpace, registrationNumber)) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean checkRegistrationNumber(Space space, String registrationNumber) {
-        return space.getVehicle().getRegistrationNumber().equals(registrationNumber);
+    @Override
+    public boolean checkRegistrationNumber(Space rentedSpace, String registrationNumber) {
+        return rentedSpace.getVehicle().getRegistrationNumber().equals(registrationNumber);
     }
 
+    @Override
     public Space replaceWith(int index, Space space) {
-        Space replacedSpace = spaces[index];
+        Space replacedRentedSpace = spaces[index];
         spaces[index] = space;
-        return replacedSpace;
+        return replacedRentedSpace;
     }
 
+    @Override
     public Space remove(int index) {
-        Space removedSpace = spaces[index];
+        Space removedRentedSpace = spaces[index];
         shift(index, true);
         size--;
-        return removedSpace;
+        return removedRentedSpace;
     }
 
+    @Override
     public Space remove(String registrationNumber) {
         for(int i = 0; i < getSpaces().length; i++) {
             if(checkRegistrationNumber(spaces[i], registrationNumber)) {
                 return remove(i);
             }
         }
-        return new Space();
+        return new RentedSpace();
     }
 
+
+    @Override
+    public int size() {
+        return size;
+    }
+
+    @Override
+    public Space[] getSpaces() {
+        Space[] notNullSpaces = new Space[size];
+        System.arraycopy(spaces, 0, notNullSpaces, 0, size);
+        return notNullSpaces;
+    }
+
+    @Override
+    public Vehicle[] getVehicles() {
+        Vehicle[] notNullVechicles = new Vehicle[size];
+        for(int i = 0; i < size; i++) {
+            notNullVechicles[i] = spaces[i].getVehicle();
+        }
+        return notNullVechicles;
+    }
+
+    @Override
     public void shift(int index, boolean isLeft) {
         expand();
         if (spaces.length >= index) {
@@ -124,11 +134,12 @@ public class OwnersFloor {
         }
     }
 
+    @Override
     public void expand() {
         if(spaces[spaces.length - 1] != null) {
-            Space[] updatedSpaces = new Space[size * 2];
-            System.arraycopy(spaces, 0, updatedSpaces, 0, spaces.length);
-            spaces = updatedSpaces;
+            Space[] updatedRentedSpaces = new Space[size * 2];
+            System.arraycopy(spaces, 0, updatedRentedSpaces, 0, spaces.length);
+            spaces = updatedRentedSpaces;
         }
     }
 
