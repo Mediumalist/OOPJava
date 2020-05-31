@@ -1,48 +1,58 @@
 package rpis81.chuprov.oop.model;
 
-public class RentedSpace implements Space {
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.Objects;
 
-    private Vehicle vehicle;
-    private Person person;
+public class RentedSpace extends AbstractSpace {
 
-    public RentedSpace(Vehicle vehicle, Person person) {
-        this.vehicle = vehicle;
-        this.person = person;
-    }
+    private final static LocalDate DEFAULT_SINCE_DATE = LocalDate.now().minusDays(1);
+    private final static LocalDate DEFAULT_ENDS_DATE = LocalDate.now().plusDays(1);
+
+    private LocalDate rentEndsDate;
 
     public RentedSpace() {
-        this(new Vehicle(), Person.getUnknownPerson());
+        this(Vehicle.getNoVehicle(), Person.getUnknownPerson(), DEFAULT_SINCE_DATE, DEFAULT_ENDS_DATE);
+    }
+
+    public RentedSpace(Vehicle vehicle, Person person) {
+        this(vehicle, person, DEFAULT_SINCE_DATE, DEFAULT_ENDS_DATE);
+    }
+
+    public RentedSpace(Person person, LocalDate sinceDate, LocalDate rentEndsDate) {
+        this(Vehicle.getNoVehicle(), person, sinceDate, rentEndsDate);
+    }
+
+    public RentedSpace(Vehicle vehicle, Person person, LocalDate sinceDate, LocalDate rentEndsDate) {
+        super(vehicle, person, sinceDate);
+        this.rentEndsDate = checkDates(sinceDate, rentEndsDate);
+    }
+
+    public LocalDate getRentEndsDate() {
+        return rentEndsDate;
+    }
+
+    public void setRentEndsDate(LocalDate rentEndsDate) {
+        this.rentEndsDate = Objects.requireNonNull(rentEndsDate, "Значение параметра rentEndsDate не должно быть null");
     }
 
     @Override
-    public Vehicle getVehicle() {
-        return vehicle;
-    }
-
-    @Override
-    public void setVehicle(Vehicle vehicle) {
-        this.vehicle = vehicle;
-    }
-
-    @Override
-    public Person getPerson() {
-        return person;
-    }
-
-    @Override
-    public void setPerson(Person person) {
-        this.person = person;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return vehicle == null || vehicle.getRegistrationNumber().isEmpty();
+    public Period getPeriod() {
+        return Period.between(getSinceDate(), rentEndsDate);
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("# Space #\n");
-        builder.append(vehicle.toString()).append(person.toString());
-        return builder.toString();
+        return String.format("Tenant:\n%s[Rent ends date] %s\n", super.toString(), rentEndsDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return 53 * super.hashCode();
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

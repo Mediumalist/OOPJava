@@ -1,44 +1,37 @@
 package rpis81.chuprov.oop.model;
 
-public class OwnedSpace implements Space {
+import java.time.LocalDate;
 
-    private Vehicle vehicle;
-    private Person person;
+public class OwnedSpace extends AbstractSpace {
+
+    public OwnedSpace() {
+        super();
+    }
 
     public OwnedSpace(Vehicle vehicle, Person person) {
-        this.vehicle = vehicle;
-        this.person = person;
+        super(vehicle, person);
     }
 
-    @Override
-    public Vehicle getVehicle() {
-        return vehicle;
+    public OwnedSpace(Person person, LocalDate sinceDate) {
+        super(person, sinceDate);
     }
 
-    @Override
-    public void setVehicle(Vehicle vehicle) {
-        this.vehicle = vehicle;
-    }
-
-    @Override
-    public Person getPerson() {
-        return person;
-    }
-
-    @Override
-    public void setPerson(Person person) {
-        this.person = person;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return vehicle == null || vehicle.getRegistrationNumber().isEmpty();
+    public OwnedSpace(Vehicle vehicle, Person person, LocalDate sinceDate) {
+        super(vehicle, person, sinceDate);
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("# Space #\n");
-        builder.append(vehicle.toString()).append(person.toString());
-        return builder.toString();
+        return String.format("Owner:\n%s", super.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return 71 * super.hashCode();
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }
