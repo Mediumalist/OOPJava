@@ -1,48 +1,16 @@
 package rpis81.chuprov.oop.model;
 
-public class RentedSpace implements Space {
-
-    private Vehicle vehicle;
-    private Person person;
-
-    public RentedSpace(Vehicle vehicle, Person person) {
-        this.vehicle = vehicle;
-        this.person = person;
-    }
+public class RentedSpace extends AbstractSpace {
 
     public RentedSpace() {
-        this(new Vehicle(), Person.getUnknownPerson());
+        super();
     }
 
-    @Override
-    public Vehicle getVehicle() {
-        return vehicle;
+    public RentedSpace(Person person) {
+        super(person);
     }
 
-    @Override
-    public void setVehicle(Vehicle vehicle) {
-        this.vehicle = vehicle;
-    }
-
-    @Override
-    public Person getPerson() {
-        return person;
-    }
-
-    @Override
-    public void setPerson(Person person) {
-        this.person = person;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return vehicle == null || vehicle.getRegistrationNumber().isEmpty();
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder("# Space #\n");
-        builder.append(vehicle.toString()).append(person.toString());
-        return builder.toString();
+    public RentedSpace(Vehicle vehicle, Person person) {
+        super(vehicle, person);
     }
 }
