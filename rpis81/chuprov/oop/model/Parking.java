@@ -1,18 +1,18 @@
 package rpis81.chuprov.oop.model;
 
-public class Parking {
+public class Parking implements InstanceHandler {
 
-    private OwnersFloor[] floors;
+    private Floor[] floors;
     private int size;
     private final static int INITIAL_SIZE = 0;
 
-    public Parking(OwnersFloor[] floors) {
+    public Parking(Floor... floors) {
         this.floors = floors;
         this.size = floors.length;
     }
 
     public Parking(int size) {
-        this.floors = new OwnersFloor[size];
+        this.floors = new Floor[size];
         this.size = INITIAL_SIZE;
     }
 
@@ -26,12 +26,9 @@ public class Parking {
         return notNullFloors;
     }
 
-    public OwnersFloor[] getSortedFloors() {
-        /*
-         *  Пока что сортировка пузырьком вместо компаратора
-         */
-        OwnersFloor floor;
-        OwnersFloor[] sortedFloors = floors.clone();
+    public Floor[] getSortedFloors() {
+        Floor floor;
+        Floor[] sortedFloors = floors.clone();
         for(int i = 0; i < sortedFloors.length; i++) {
             for(int j = i + 1; j < i; j++) {
                 if(sortedFloors[i].size() > sortedFloors[j].size()) {
@@ -47,7 +44,7 @@ public class Parking {
     public Vehicle[] getVechicles() {
         Vehicle[] vehicles = new Vehicle[getSpacesCount()];
         int counter = 0;
-        for(OwnersFloor floor : floors) {
+        for(Floor floor : floors) {
             for(Space space : floor.getSpaces()) {
                 vehicles[counter] = space.getVehicle();
                 counter++;
@@ -58,7 +55,7 @@ public class Parking {
 
     public int getSpacesCount() {
         int totalCount = 0;
-        for(OwnersFloor floor : floors) {
+        for(Floor floor : floors) {
             totalCount += floor.size();
         }
         return totalCount;
@@ -81,18 +78,18 @@ public class Parking {
         return add(floor);
     }
 
-    public OwnersFloor getFloor(int index) {
+    public Floor getFloor(int index) {
         return floors[index];
     }
 
-    public OwnersFloor replaceFloor(int index, OwnersFloor floor) {
-        OwnersFloor replacedFloor = floors[index];
+    public Floor replaceFloor(int index, OwnersFloor floor) {
+        Floor replacedFloor = floors[index];
         floors[index] = floor;
         return replacedFloor;
     }
 
-    public OwnersFloor removeFloor(int index) {
-        OwnersFloor removedFloor = floors[index];
+    public Floor removeFloor(int index) {
+        Floor removedFloor = floors[index];
         shift(index, true);
         size--;
         return removedFloor;
@@ -106,33 +103,34 @@ public class Parking {
                 }
             }
         }
-        return new Space();
+        return new RentedSpace();
     }
 
     public Space getSpace(String registrationNumber) {
-        for(OwnersFloor floor : floors) {
+        for(Floor floor : floors) {
             for(Space space : floor.getSpaces()) {
                 if(floor.checkRegistrationNumber(space, registrationNumber)) {
                     return space;
                 }
             }
         }
-        return new Space();
+        return new RentedSpace();
     }
 
-    public Space replaceSpace(Space space, String registrationNumber) {
-        Space replacedSpace = new Space();
+    public Space replaceSpace(RentedSpace rentedSpace, String registrationNumber) {
+        Space replacedSpace = new RentedSpace();
         for(int i = 0; i < getFloors().length; i++) {
             for(int j = 0; j < getFloors()[i].getSpaces().length; j++) {
                 if(floors[i].checkRegistrationNumber(floors[i].getSpace(j), registrationNumber)) {
                     replacedSpace = floors[i].getSpace(j);
-                    floors[i].getSpaces()[j] = space;
+                    floors[i].getSpaces()[j] = rentedSpace;
                 }
             }
         }
         return replacedSpace;
     }
 
+    @Override
     public void shift(int index, boolean isLeft) {
         expand();
         if (floors.length >= index) {
@@ -147,9 +145,10 @@ public class Parking {
         }
     }
 
+    @Override
     public void expand() {
         if(floors[floors.length - 1] != null) {
-            OwnersFloor[] updatedFloors = new OwnersFloor[size * 2];
+            Floor[] updatedFloors = new Floor[size * 2];
             System.arraycopy(floors, 0, updatedFloors, 0, floors.length);
             floors = updatedFloors;
         }
