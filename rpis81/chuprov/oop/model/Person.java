@@ -4,21 +4,30 @@ import java.util.Objects;
 
 public class Person implements Cloneable {
 
-    private String firstName;
-    private String secondName;
     private final static Person UNKNOWN_PERSON = new Person("", "");
 
+    private String firstName;
+    private String secondName;
+
     public Person(String firstName, String secondName) {
-        this.firstName = firstName;
-        this.secondName = secondName;
+        this.firstName = Objects.requireNonNull(firstName, "Значение firstName не должно быть null");
+        this.secondName = Objects.requireNonNull(secondName, "Значение secondName не должно быть null");
     }
 
     public String getFirstName() {
         return firstName;
     }
 
+    public void setFirstName(String firstName) {
+        this.firstName = Objects.requireNonNull(firstName, "Значение firstName не должно быть null");;
+    }
+
     public String getSecondName() {
         return secondName;
+    }
+
+    public void setSecondName(String secondName) {
+        this.secondName = Objects.requireNonNull(secondName, "Значение secondName не должно быть null");
     }
 
     public static Person getUnknownPerson() {

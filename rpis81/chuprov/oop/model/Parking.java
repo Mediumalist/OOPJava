@@ -1,12 +1,15 @@
 package rpis81.chuprov.oop.model;
 
 import java.util.Arrays;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public class Parking implements InstanceHandler {
 
+    private final static int INITIAL_SIZE = 0;
+
     private Floor[] floors;
     private int size;
-    private final static int INITIAL_SIZE = 0;
 
     public Parking(Floor... floors) {
         this.floors = floors;
@@ -65,7 +68,7 @@ public class Parking implements InstanceHandler {
         expand();
         for(int i = 0; i < floors.length; i++) {
             if(floors[i] == null) {
-                floors[i] = floor;
+                floors[i] = Objects.requireNonNull(floor, "Параметр floor не должен быть null");
                 size++;
                 return true;
             }
@@ -74,21 +77,33 @@ public class Parking implements InstanceHandler {
     }
 
     public boolean add(int index, Floor floor) {
+        if(index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
         shift(index, false);
         return add(floor);
     }
 
     public Floor getFloor(int index) {
+        if(index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
         return floors[index];
     }
 
     public Floor replaceFloor(int index, Floor floor) {
+        if(index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
         Floor replacedFloor = floors[index];
-        floors[index] = floor;
+        floors[index] = Objects.requireNonNull(floor, "Параметр floor не должен быть null");
         return replacedFloor;
     }
 
     public Floor removeFloor(int index) {
+        if(index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
         Floor removedFloor = floors[index];
         shift(index, true);
         size--;
@@ -98,18 +113,18 @@ public class Parking implements InstanceHandler {
     public Space removeSpace(String registrationNumber) {
         for(int i = 0; i < getFloors().length; i++) {
             for(int j = 0; j < getFloors()[i].getSpaces().length; j++) {
-                if(floors[i].checkRegistrationNumber(floors[i].get(j), registrationNumber)) {
+                if(floors[i].isRegistrationNumberEqual(floors[i].get(j), Vehicle.checkNumber(registrationNumber))) {
                     return floors[i].remove(j);
                 }
             }
         }
-        return new RentedSpace();
+        throw new NoSuchElementException();
     }
 
     public Space getSpace(String registrationNumber) {
         for(Floor floor : floors) {
             for(Space space : floor.getSpaces()) {
-                if(floor.checkRegistrationNumber(space, registrationNumber)) {
+                if(floor.isRegistrationNumberEqual(space, Vehicle.checkNumber(registrationNumber))) {
                     return space;
                 }
             }
@@ -121,9 +136,10 @@ public class Parking implements InstanceHandler {
         Space replacedSpace = new RentedSpace();
         for(int i = 0; i < getFloors().length; i++) {
             for(int j = 0; j < getFloors()[i].getSpaces().length; j++) {
-                if(floors[i].checkRegistrationNumber(floors[i].get(j), registrationNumber)) {
+                if(floors[i].isRegistrationNumberEqual(floors[i].get(j), Vehicle.checkNumber(registrationNumber))) {
                     replacedSpace = floors[i].get(j);
-                    floors[i].getSpaces()[j] = space;
+                    floors[i].getSpaces()[j] = Objects.requireNonNull(space,
+                            "Параметр space не должен быть null");
                 }
             }
         }
@@ -137,12 +153,14 @@ public class Parking implements InstanceHandler {
     public int getSpacesCountByVehiclesType(VehicleTypes type) {
         int count = 0;
         for(Floor floor : getFloors()) {
-            count += floor.getSpacesCountByVehiclesType(type);
+            count += floor.getSpacesCountByVehiclesType(Objects.requireNonNull(type,
+                    "Параметр type не должен быть null"));
         }
         return count;
     }
 
     public Floor[] getFloorsWithPerson(Person person) {
+        Objects.requireNonNull(person, "Параметр person не должен быть null");
         return Arrays.stream(floors)
                 .filter(floor -> floor.hasSpace(person))
                 .toArray(Floor[]::new);
@@ -151,7 +169,7 @@ public class Parking implements InstanceHandler {
     @Override
     public void shift(int index, boolean isLeft) {
         expand();
-        if (floors.length >= index) {
+        if (floors.length > index && index >= 0) {
             if (isLeft) {
                 System.arraycopy(floors, index + 1, floors, index, floors.length - index - 1);
                 floors[floors.length - 1] = null;
@@ -173,6 +191,7 @@ public class Parking implements InstanceHandler {
     }
 
     public void printFloorsWithPerson(Person person) {
+        Objects.requireNonNull(person, "Параметр person не должен быть null");
         for(Floor floor : getFloorsWithPerson(person)) {
             System.out.println(floor.toString());
         }

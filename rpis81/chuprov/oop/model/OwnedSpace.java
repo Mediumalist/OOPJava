@@ -1,17 +1,23 @@
 package rpis81.chuprov.oop.model;
 
+import java.time.LocalDate;
+
 public class OwnedSpace extends AbstractSpace {
 
     public OwnedSpace() {
         super();
     }
 
-    public OwnedSpace(Person person) {
-        super(person);
-    }
-
     public OwnedSpace(Vehicle vehicle, Person person) {
         super(vehicle, person);
+    }
+
+    public OwnedSpace(Person person, LocalDate sinceDate) {
+        super(person, sinceDate);
+    }
+
+    public OwnedSpace(Vehicle vehicle, Person person, LocalDate sinceDate) {
+        super(vehicle, person, sinceDate);
     }
 
     @Override

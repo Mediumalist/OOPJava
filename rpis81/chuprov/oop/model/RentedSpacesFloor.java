@@ -1,14 +1,17 @@
 package rpis81.chuprov.oop.model;
 
+import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public class RentedSpacesFloor implements Floor, InstanceHandler {
 
+    private final static int DEFAULT_SIZE = 1;
+    private final static RentedSpace DEFAULT_SPACE = new RentedSpace();
+
     private Node head;
     private int size;
-    private final static int DEFAULT_SIZE = 1;
-    private final static Space DEFAULT_SPACE = new RentedSpace();
 
     public RentedSpacesFloor() {
         this.head = new Node(null);
@@ -32,7 +35,7 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
             node.setPrevious(previousNode);
             node.getPrevious().setNext(node);
         }
-        node.setNext(new Node(node, head, space));
+        node.setNext(new Node(node, head, Objects.requireNonNull(space, "Параметр space не должен быть null")));
         size++;
         return true;
     }
@@ -40,31 +43,35 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
     @Override
     public boolean add(int index, Space space) {
         shift(index, false);
-        getNode(index).setValue(space);
+        getNode(index).setValue(Objects.requireNonNull(space, "Параметр space не должен быть null"));
         return true;
     }
 
     @Override
     public Space get(int index) {
+        if(index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
         return getNode(index).getValue();
     }
 
     @Override
-    public Space get(String registrationNumber) {
+    public Space get(String registrationNumber) throws NoRentedSpaceException {
+        Objects.requireNonNull(registrationNumber, "Параметр registrationNumber не должен быть null");
         Node node = head;
         while(node.getNext() != head) {
             node = (node.getNext() != null) ? node.getNext() : node;
-            if(checkRegistrationNumber(node.getValue(), registrationNumber)) {
+            if(isRegistrationNumberEqual(node.getValue(), registrationNumber)) {
                 return node.getValue();
             }
         }
-        return DEFAULT_SPACE;
+        throw new NoRentedSpaceException();
     }
 
     @Override
     public boolean hasSpace(String registrationNumber) {
         return Arrays.stream(getSpaces())
-                .anyMatch(space -> checkRegistrationNumber(space, registrationNumber));
+                .anyMatch(space -> isRegistrationNumberEqual(space, registrationNumber));
     }
 
     @Override
@@ -73,19 +80,22 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
     }
 
     @Override
-    public boolean checkRegistrationNumber(Space space, String registrationNumber) {
+    public boolean isRegistrationNumberEqual(Space space, String registrationNumber) {
         return space.getVehicle().getRegistrationNumber().equals(registrationNumber);
     }
 
     @Override
-    public boolean checkVehiclesType(Space space, VehicleTypes type) {
+    public boolean isVehiclesTypeEqual(Space space, VehicleTypes type) {
         return space.getVehicle().getType().equals(type);
     }
 
     @Override
     public Space replaceWith(int index, Space space) {
+        if(index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
         Space replacedSpace = get(index);
-        getNode(index).setValue(space);
+        getNode(index).setValue(Objects.requireNonNull(space, "Параметр space не должен быть null"));
         return replacedSpace;
     }
 
@@ -99,11 +109,11 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
     @Override
     public Space remove(String registrationNumber) {
         for(int i = 0; i < size; i++) {
-            if(checkRegistrationNumber(get(i), registrationNumber)) {
+            if(isRegistrationNumberEqual(get(i), Vehicle.checkNumber(registrationNumber))) {
                 return remove(i);
             }
         }
-        return DEFAULT_SPACE;
+        throw new NoSuchElementException();
     }
 
     @Override
@@ -114,16 +124,18 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
 
     @Override
     public int indexOf(Space space) {
+        Objects.requireNonNull(space, "Параметр space не должен быть null");
         for(int i = 0; i < size; i++) {
             if(get(i).equals(space)) {
                 return i;
             }
         }
-        return 0;
+        throw new IndexOutOfBoundsException();
     }
 
     @Override
     public int getSpacesCountWithPerson(Person person) {
+        Objects.requireNonNull(person, "Параметр person не должен быть null");
         return (int) Arrays.stream(getSpaces())
                 .filter(space -> space.getPerson().equals(person))
                 .count();
@@ -131,7 +143,7 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
 
     @Override
     public int size() {
-        return size;
+        return getSpaces().length;
     }
 
     @Override
@@ -140,7 +152,7 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
         for(int i = 0; i < size; i++) {
             spaces[i] = get(i);
         }
-        return spaces;
+        return Arrays.stream(spaces).filter(Objects::nonNull).toArray(Space[]::new);
     }
 
     @Override
@@ -159,7 +171,7 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
     @Override
     public Space[] getSpacesByVehiclesType(VehicleTypes type) {
         return Arrays.stream(getSpaces())
-                .filter(space -> checkVehiclesType(space, type))
+                .filter(space -> isVehiclesTypeEqual(space, Objects.requireNonNull(type, "Параметр type не должен быть null")))
                 .toArray(Space[]::new);
     }
 
@@ -170,7 +182,35 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
 
     @Override
     public int getSpacesCountByVehiclesType(VehicleTypes type) {
-        return getSpacesByVehiclesType(type).length;
+        return getSpacesByVehiclesType(Objects.requireNonNull(type, "Параметр type не должен быть null")).length;
+    }
+
+    @Override
+    public LocalDate getNearestEndsDate() {
+        LocalDate nearestDate = LocalDate.MAX;
+        for(Space space : getRentedSpaces()) {
+            if(((RentedSpace)space).getRentEndsDate().isBefore(nearestDate)) {
+                nearestDate = ((RentedSpace)space).getRentEndsDate();
+            }
+        }
+        return nearestDate;
+    }
+
+    @Override
+    public Space getSpaceWithNearestEndsDate() throws NoRentedSpaceException {
+        for(Space space : getRentedSpaces()) {
+            if(((RentedSpace)space).getRentEndsDate().equals(getNearestEndsDate())) {
+                return space;
+            }
+        }
+        throw new NoRentedSpaceException();
+    }
+
+    private Space[] getRentedSpaces() {
+        return Arrays.stream(getSpaces())
+                .filter(Objects::nonNull)
+                .filter(space -> space instanceof RentedSpace)
+                .toArray(Space[]::new);
     }
 
     private Node getNode(int index) {
@@ -183,26 +223,42 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
 
     @Override
     public void shift(int index, boolean isLeft) {
+        if(index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
         Node node = getNode(index), nextNode = node.getNext(), previousNode = node.getPrevious();
         if(isLeft) {
-            previousNode.setNext(nextNode);
-            nextNode.setPrevious(previousNode);
+            if(index == 0) {
+                head = getNode(1);
+            }
+            else {
+                previousNode.setNext(nextNode);
+                nextNode.setPrevious(previousNode);
+            }
             size--;
         }
         else {
             Node insertedNode = new Node(null);
-            previousNode.setNext(insertedNode);
-            insertedNode.setNext(node);
-            insertedNode.setPrevious(previousNode);
-            node.setPrevious(insertedNode);
+            if(index == 0) {
+                insertedNode.setNext(node);
+                insertedNode.setPrevious(insertedNode);
+                head = insertedNode;
+                getNode(size).setNext(head);
+                node.setPrevious(head);
+            }
+            else {
+                previousNode.setNext(insertedNode);
+                insertedNode.setNext(node);
+                insertedNode.setPrevious(previousNode);
+                node.setPrevious(insertedNode);
+            }
             size++;
         }
     }
 
     @Override
     public void expand() {
-        add(new RentedSpace());
-        size++;
+        add(DEFAULT_SPACE);
     }
 
     public void printSpaces() {
