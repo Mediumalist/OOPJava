@@ -14,4 +14,8 @@ public interface Floor {
     Space[] getSpaces();
     Vehicle[] getVehicles();
     boolean checkRegistrationNumber(Space space, String registrationNumber);
+    boolean checkVehiclesType(Space space, VehicleTypes types);
+    Space[] getSpacesByVehiclesType(VehicleTypes type);
+    Space[] getFreeSpaces();
+    int getSpacesCountByVehiclesType(VehicleTypes type);
 }

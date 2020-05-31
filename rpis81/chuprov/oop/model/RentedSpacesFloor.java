@@ -74,6 +74,11 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
     }
 
     @Override
+    public boolean checkVehiclesType(Space space, VehicleTypes type) {
+        return space.getVehicle().getType().equals(type);
+    }
+
+    @Override
     public Space replaceWith(int index, Space space) {
         Space replacedSpace = getSpace(index);
         getNode(index).setValue(space);
@@ -120,6 +125,33 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
         return vehicles;
     }
 
+    @Override
+    public Space[] getSpacesByVehiclesType(VehicleTypes type) {
+        int index = 0;
+        Space[] spaces = new Space[getSpacesCountByVehiclesType(type)];
+        for(Space space : getSpaces()) {
+            if(checkVehiclesType(space, type)) {
+                spaces[index] = space;
+                index++;
+            }
+        }
+        return spaces;
+    }
+
+    @Override
+    public Space[] getFreeSpaces() {
+        return getSpacesByVehiclesType(VehicleTypes.NONE);
+    }
+
+    @Override
+    public int getSpacesCountByVehiclesType(VehicleTypes type) {
+        int count = 0;
+        for(int i = 0; i < size; i++) {
+            count = (checkVehiclesType(getSpace(i), type)) ? count + 1 : count;
+        }
+        return count;
+    }
+
     private Node getNode(int index) {
         Node node = head;
         for(int i = 0; i < index; i++) {
@@ -152,9 +184,8 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
         size++;
     }
 
-
     public void printSpaces() {
-        for (Space space : getSpaces()) {
+        for(Space space : getSpaces()) {
             System.out.println(space.toString());
         }
     }
@@ -162,6 +193,12 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
     public void printVehicles() {
         for(Vehicle vehicle : getVehicles()) {
             System.out.println(vehicle.toString());
+        }
+    }
+
+    public void printSpacesByVehiclesType(VehicleTypes type) {
+        for(Space space : getSpacesByVehiclesType(type)) {
+            System.out.println(space.toString());
         }
     }
 }
