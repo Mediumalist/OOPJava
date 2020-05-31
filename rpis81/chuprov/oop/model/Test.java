@@ -1,5 +1,4 @@
 package rpis81.chuprov.oop.model;
-
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.NoSuchElementException;
@@ -14,10 +13,11 @@ public class Test {
         lab4tests();
         lab5tests();
         lab6tests();
+        lab7tests();
     }
 
     /*
-     *  Лабораторная №1
+     *  Лабораторная №1. Создание базовой логики
      */
 
     private static void lab1tests() {
@@ -83,9 +83,9 @@ public class Test {
         parking.add(0, floor);
         System.out.print(parking.toString());
         System.out.println(parking.getSpacesCount());
-        System.out.print("\nРазмеры отсортированных этажей: " + parking.getSortedFloors()[0].size() + ", " +
-                parking.getSortedFloors()[1].size());
-        System.out.print("\nОбщее кол-во машин: " + parking.getVechicles().length);
+        System.out.print("\nРазмеры отсортированных этажей: " + parking.getSortedFloors().get(0).size() + ", " +
+                parking.getSortedFloors().get(1).size());
+        System.out.print("\nОбщее кол-во машин: " + parking.getVechicles());
         parking.replaceFloor(0, floor);
         try {
             parking.replaceSpace(new RentedSpace(), "T441AX56");
@@ -99,7 +99,7 @@ public class Test {
     }
 
     /*
-     *  Лабораторная №2
+     *  Лабораторная №2. Интерфейсы
      */
 
     private static void lab2tests() {
@@ -163,7 +163,7 @@ public class Test {
     private static OwnersFloor createOwnersFloor() {
         Random random = new Random();
         OwnersFloor floor = new OwnersFloor();
-        for (Space space : createRentedSpacesFloor().getSpaces()) {
+        for (Space space : createRentedSpacesFloor().toArray()) {
             floor.add(new OwnedSpace(space.getVehicle(), space.getPerson(), getRandomSinceDate(random)));
         }
         return floor;
@@ -186,7 +186,7 @@ public class Test {
     }
 
     /*
-     *  Лабораторная №3
+     *  Лабораторная №3. Изменения в некоторых классах
      */
 
     private static void lab3tests() {
@@ -226,7 +226,7 @@ public class Test {
         printFrame();
         firstFloor.add(new RentedSpace());
         firstFloor.add(new RentedSpace());
-        System.out.println("Кол-во пустых мест на первом этаже: " + firstFloor.getFreeSpaces().length);
+        System.out.println("Кол-во пустых мест на первом этаже: " + firstFloor.getFreeSpaces().size());
         printFrame();
         secondFloor.add(new RentedSpace());
         System.out.println("Oбщее число незанятых парковочных мест: " + parking.getFreeSpacesCount());
@@ -235,14 +235,14 @@ public class Test {
     }
 
     /*
-     *  Лабораторная №4
+     *  Лабораторная №4. Методы toString(), equals(), hashCode() и др.
      */
 
     private static void lab4tests() {
         printFrame();
         System.out.println("Лабораторная №4");
         printFrame();
-        System.out.println("Тестирование методов toString(), equals() и hascode()");
+        System.out.println("Тестирование методов toString(), equals() и hashCode()");
         printFrame();
         OwnersFloor firstFloor = createOwnersFloor();
         RentedSpacesFloor secondFloor = createRentedSpacesFloor();
@@ -278,7 +278,7 @@ public class Test {
     }
 
     /*
-     *  Лабораторная №5
+     *  Лабораторная №5. Исключения. LocalDate
      */
 
     private static void lab5tests() {
@@ -318,7 +318,7 @@ public class Test {
     }
 
     /*
-     *  Лабораторная №6
+     *  Лабораторная №6. Компаратор. Итератор
      */
 
     private static void lab6tests() {
@@ -339,5 +339,33 @@ public class Test {
         System.out.println();
         printFrame();
         System.out.println("[!] Итератор используется в методах, которые уже протестированы в других лабораторных [!]");
+    }
+
+    /*
+     *  Лабораторная №7. Collection. Изменение возвращаемых типов в Parking и Floor
+     */
+
+    private static void lab7tests() {
+        printFrame();
+        System.out.println("Лабораторная №7");
+        printFrame();
+        System.out.println("Тестирование методов интерфейса Collection");
+        printFrame();
+        Parking parkingOfOwnersFloors = new Parking(createOwnersFloor(), createOwnersFloor());
+        Floor firstFloor = parkingOfOwnersFloors.getFloor(0), secondFloor = parkingOfOwnersFloors.getFloor(1);
+        firstFloor.remove(0);
+        firstFloor.add(new OwnedSpace());
+        System.out.println("Начальное состояние парковки: " + parkingOfOwnersFloors.toString());
+        printFrame();
+        System.out.println("Результат работы метода contains(): " + firstFloor.contains(new OwnedSpace()));
+        System.out.println("Результат работы метода containsAll(): " + firstFloor.containsAll(secondFloor));
+        System.out.println("Результат работы метода retainAll(): " + firstFloor.retainAll(secondFloor));
+        System.out.println("Текущий размер первого этажа: " + firstFloor.size());
+        System.out.println("Результат работы метода addAll(): " + firstFloor.addAll(secondFloor));
+        System.out.println("Текущий размер первого этажа: " + firstFloor.size());
+        System.out.println("Результат работы метода removeAll(): " + firstFloor.removeAll(secondFloor));
+        System.out.println("Текущий размер первого этажа: " + firstFloor.size());
+        secondFloor.clear();
+        System.out.println("Размер второго этажа после вызова метода clear: " + secondFloor.size());
     }
 }

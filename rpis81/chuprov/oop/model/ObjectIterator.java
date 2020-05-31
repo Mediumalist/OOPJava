@@ -19,9 +19,9 @@ public class ObjectIterator {
     }
 
     public Object next() {
-        if(!hasNext()) {
-            throw new NoSuchElementException("Элементов больше не осталось");
+        if(hasNext()) {
+            return objects[index++];
         }
-        return objects[index++];
+        throw new NoSuchElementException("Элементов больше не осталось");
     }
 }

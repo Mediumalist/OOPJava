@@ -1,4 +1,5 @@
 package rpis81.chuprov.oop.model;
+
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,6 +27,7 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
 
     @Override
     public boolean add(Space space) {
+        int initialSize = size();
         Node previousNode, node = head;
         while(node.getNext() != head) {
             previousNode = node;
@@ -35,14 +37,15 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
         }
         node.setNext(new Node(node, head, Objects.requireNonNull(space, "Параметр space не должен быть null")));
         size++;
-        return true;
+        return initialSize < size();
     }
 
     @Override
     public boolean add(int index, Space space) {
+        int initialSize = size();
         shift(index, false);
         getNode(index).setValue(Objects.requireNonNull(space, "Параметр space не должен быть null"));
-        return true;
+        return initialSize < size();
     }
 
     @Override
@@ -72,7 +75,7 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
     }
 
     @Override
-    public Space[] getSpaces() {
+    public Space[] toArray() {
         Space[] spaces = new Space[size];
         for(int i = 0; i < size; i++) {
             spaces[i] = get(i);
@@ -98,8 +101,8 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
         }
         else {
             Node insertedNode = new Node(null);
+            insertedNode.setNext(node);
             if(index == 0) {
-                insertedNode.setNext(node);
                 insertedNode.setPrevious(insertedNode);
                 head = insertedNode;
                 getNode(size).setNext(head);
@@ -107,7 +110,6 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
             }
             else {
                 previousNode.setNext(insertedNode);
-                insertedNode.setNext(node);
                 insertedNode.setPrevious(previousNode);
                 node.setPrevious(insertedNode);
             }
@@ -143,7 +145,7 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
             return false;
         }
         RentedSpacesFloor other = (RentedSpacesFloor) obj;
-        return size == other.size && Objects.deepEquals(getSpaces(), other.getSpaces());
+        return size == other.size && Objects.deepEquals(toArray(), other.toArray());
     }
 
     @Override

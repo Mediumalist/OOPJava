@@ -1,10 +1,8 @@
 package rpis81.chuprov.oop.model;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class Parking implements InstanceHandler, Iterable<Floor> {
 
@@ -31,17 +29,15 @@ public class Parking implements InstanceHandler, Iterable<Floor> {
         return Arrays.stream(floors).filter(Objects::nonNull).toArray(Floor[]::new);
     }
 
-    public Floor[] getSortedFloors() {
-        return Arrays.stream(getFloors()).sorted(Floor::compareTo).toArray(Floor[]::new);
+    public List<Floor> getSortedFloors() {
+        return Arrays.stream(getFloors())
+                .sorted(Floor::compareTo)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public Vehicle[] getVechicles() {
-        Vehicle[] vehicles = new Vehicle[getSpacesCount()];
-        int counter = 0;
-        for(Floor floor : getFloors()) {
-            System.arraycopy(floor.getVehicles(), 0, vehicles, counter, floor.getVehiclesCount());
-            counter += floor.getVehiclesCount();
-        }
+    public Collection<Vehicle> getVechicles() {
+        Collection<Vehicle> vehicles = new ArrayList<>();
+        iterator().forEachRemaining(floor -> vehicles.addAll(floor.getVehicles()));
         return vehicles;
     }
 
@@ -107,7 +103,7 @@ public class Parking implements InstanceHandler, Iterable<Floor> {
 
     public Space getSpace(String registrationNumber) throws NoRentedSpaceException {
         for(Floor floor : floors) {
-            for(Space space : floor.getSpaces()) {
+            for(Space space : floor.toArray()) {
                 if(floor.isRegistrationNumberEqual(space, Vehicle.checkNumber(registrationNumber))) {
                     return space;
                 }
@@ -136,11 +132,11 @@ public class Parking implements InstanceHandler, Iterable<Floor> {
         return count.get();
     }
 
-    public Floor[] getFloorsWithPerson(Person person) {
+    public Set<Floor> getFloorsWithPerson(Person person) {
         Objects.requireNonNull(person, "Параметр person не должен быть null");
         return Arrays.stream(floors)
                 .filter(floor -> floor.hasSpace(person))
-                .toArray(Floor[]::new);
+                .collect(Collectors.toCollection(HashSet::new));
     }
 
     public void printFloorsWithPerson(Person person) {
