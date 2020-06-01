@@ -181,4 +181,21 @@ public class Parking implements Iterable<Floor> {
     public Iterator<Floor> iterator() {
         return new FloorIterator(getFloors());
     }
+
+    private class FloorIterator extends ObjectIterator implements Iterator<Floor> {
+
+        public FloorIterator(Floor[] floors) {
+            super(floors);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return super.hasNext();
+        }
+
+        @Override
+        public Floor next() {
+            return (Floor) super.next();
+        }
+    }
 }

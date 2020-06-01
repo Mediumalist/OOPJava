@@ -1,6 +1,7 @@
 package rpis81.chuprov.oop.model;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -156,5 +157,27 @@ public class RentedSpacesFloor implements Floor {
         Space removedSpace = get(index);
         shift(index, true);
         return removedSpace;
+    }
+
+    @Override
+    public Iterator<Space> iterator() {
+        return new SpaceIterator(toArray());
+    }
+
+    private class SpaceIterator extends ObjectIterator implements Iterator<Space> {
+
+        public SpaceIterator(Space[] spaces) {
+            super(spaces);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return super.hasNext();
+        }
+
+        @Override
+        public Space next() {
+            return (Space) super.next();
+        }
     }
 }

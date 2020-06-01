@@ -138,9 +138,7 @@ public interface Floor extends Comparable<Floor>, Iterable<Space>, Collection<Sp
     }
 
     @Override
-    default Iterator<Space> iterator() {
-        return new SpaceIterator(toArray());
-    }
+    Iterator<Space> iterator();
 
     @Override
     default boolean isEmpty() {

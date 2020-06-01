@@ -2,7 +2,7 @@ package rpis81.chuprov.oop.model;
 
 import java.util.NoSuchElementException;
 
-public class ObjectIterator {
+public abstract class ObjectIterator {
 
     private static final int INITIAL_VALUE = 0;
 

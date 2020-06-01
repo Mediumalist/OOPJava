@@ -27,7 +27,7 @@ public class OwnedSpace extends AbstractSpace {
 
     @Override
     public int hashCode() {
-        return 71 * super.hashCode();
+        return Math.abs(71 * super.hashCode());
     }
 
     @Override

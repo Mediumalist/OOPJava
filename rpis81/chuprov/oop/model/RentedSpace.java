@@ -48,7 +48,7 @@ public class RentedSpace extends AbstractSpace implements Comparable<RentedSpace
 
     @Override
     public int hashCode() {
-        return 53 * super.hashCode();
+        return Math.abs(53 * super.hashCode());
     }
 
     @Override
