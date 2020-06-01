@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class RentedSpacesFloor implements Floor, InstanceHandler {
+public class RentedSpacesFloor implements Floor {
 
     private final static int DEFAULT_SIZE = 1;
     private final static RentedSpace DEFAULT_SPACE = new RentedSpace();
@@ -83,8 +83,7 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
         return Arrays.stream(spaces).filter(Objects::nonNull).toArray(Space[]::new);
     }
 
-    @Override
-    public void shift(int index, boolean isLeft) {
+    private void shift(int index, boolean isLeft) {
         if(index < 0 || index >= size) {
             throw new IndexOutOfBoundsException();
         }
@@ -117,8 +116,7 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
         }
     }
 
-    @Override
-    public void expand() {
+    private void expand() {
         add(DEFAULT_SPACE);
     }
 
@@ -151,5 +149,12 @@ public class RentedSpacesFloor implements Floor, InstanceHandler {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    @Override
+    public Space remove(int index) throws IndexOutOfBoundsException {
+        Space removedSpace = get(index);
+        shift(index, true);
+        return removedSpace;
     }
 }

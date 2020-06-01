@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public interface Floor extends InstanceHandler, Comparable<Floor>, Iterable<Space>, Collection<Space> {
+public interface Floor extends Comparable<Floor>, Iterable<Space>, Collection<Space> {
 
     boolean add(Space space);
     boolean add(int index, Space space) throws IndexOutOfBoundsException;
@@ -30,11 +30,7 @@ public interface Floor extends InstanceHandler, Comparable<Floor>, Iterable<Spac
 
     Space replaceWith(int index, Space space) throws IndexOutOfBoundsException;
 
-    default Space remove(int index) throws IndexOutOfBoundsException {
-        Space removedSpace = get(index);
-        shift(index, true);
-        return removedSpace;
-    }
+    Space remove(int index) throws IndexOutOfBoundsException;
 
     default Space remove(String registrationNumber) throws NoSuchElementException {
         for(int i = 0; i < size(); i++) {

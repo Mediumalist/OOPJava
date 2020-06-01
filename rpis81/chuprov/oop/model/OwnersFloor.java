@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class OwnersFloor implements Floor, InstanceHandler {
+public class OwnersFloor implements Floor {
 
     private final static int DEFAULT_SIZE = 16;
     private final static int INITIAL_SIZE = 0;
@@ -69,8 +69,7 @@ public class OwnersFloor implements Floor, InstanceHandler {
         return Arrays.stream(spaces).filter(Objects::nonNull).toArray(Space[]::new);
     }
 
-    @Override
-    public void shift(int index, boolean isLeft) {
+    private void shift(int index, boolean isLeft) {
         expand();
         if (spaces.length > index && index >= 0) {
             if (isLeft) {
@@ -88,8 +87,7 @@ public class OwnersFloor implements Floor, InstanceHandler {
         }
     }
 
-    @Override
-    public void expand() {
+    private void expand() {
         if(spaces[spaces.length - 1] != null) {
             Space[] updatedRentedSpaces = new Space[size * 2];
             System.arraycopy(spaces, 0, updatedRentedSpaces, 0, spaces.length);
@@ -126,5 +124,12 @@ public class OwnersFloor implements Floor, InstanceHandler {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    @Override
+    public Space remove(int index) throws IndexOutOfBoundsException {
+        Space removedSpace = get(index);
+        shift(index, true);
+        return removedSpace;
     }
 }

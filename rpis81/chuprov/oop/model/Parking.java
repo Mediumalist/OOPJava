@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class Parking implements InstanceHandler, Iterable<Floor> {
+public class Parking implements Iterable<Floor> {
 
     private final static int INITIAL_SIZE = 0;
 
@@ -146,8 +146,7 @@ public class Parking implements InstanceHandler, Iterable<Floor> {
         }
     }
 
-    @Override
-    public void shift(int index, boolean isLeft) {
+    private void shift(int index, boolean isLeft) {
         expand();
         if (floors.length > index && index >= 0) {
             if (isLeft) {
@@ -162,8 +161,7 @@ public class Parking implements InstanceHandler, Iterable<Floor> {
         }
     }
 
-    @Override
-    public void expand() {
+    private void expand() {
         if(floors[floors.length - 1] != null) {
             Floor[] updatedFloors = new Floor[size * 2];
             System.arraycopy(floors, 0, updatedFloors, 0, floors.length);
